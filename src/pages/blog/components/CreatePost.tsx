@@ -1,7 +1,8 @@
 import React from "react";
 import { Post } from "../../../types/blog.type";
-import { useDispatch } from "react-redux";
-import { addPost } from "../blog.reducer";
+import { useDispatch, useSelector } from "react-redux";
+import { addPost, cancelUpdatingPost, startUpdatingPost, updatePost } from "../blog.reducer";
+import { RootState } from "../../../store";
 
 const initialState: Post = {
   id: "",
@@ -13,13 +14,32 @@ const initialState: Post = {
 
 function CreatePost() {
   const [formData, setFormData] = React.useState(initialState);
+  const updatingPost = useSelector((state: RootState) => state.blog.updatingPost);
   const dispatch = useDispatch();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formDataWithId = { ...formData, id: new Date().toISOString() };
-    dispatch(addPost(formDataWithId));
-    console.log(formDataWithId);
+    if(updatingPost != null) {
+      dispatch(updatePost(formData));
+    } else {
+      const formDataWithId = { ...formData, id: new Date().toISOString() };
+      dispatch(addPost(formDataWithId));
+      setFormData(initialState);
+    }
   };
+
+  const handleCancelUpdatingPost = () => {
+    dispatch(cancelUpdatingPost());
+  }
+
+
+  React.useEffect(() => {
+    if(updatingPost != null) {
+      setFormData(updatingPost);
+    } else {
+      setFormData(initialState);
+    }
+  }, [updatingPost]);
 
   return (
     <div>
@@ -61,12 +81,12 @@ function CreatePost() {
             setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
         ></textarea>
-        <div className="buttons flex mt-3">
-          <div className="btn border border-gray-300 p-1 px-4 font-semibold cursor-pointer text-gray-500 ml-auto">
-            Cancel
-          </div>
-          <button className="btn border border-indigo-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-indigo-500">
-            Post
+        <div className="mt-3 flex justify-end">
+          {updatingPost && <button className="btn border border-gray-300 p-1 px-4 font-semibold cursor-pointer text-gray-500 ml-auto" onClick={handleCancelUpdatingPost}>
+            Huỷ
+          </button>}
+          <button className="btn border border-indigo-500 p-1 px-4 font-semibold cursor-pointer text-white ml-2 bg-indigo-500">
+            {updatingPost ? 'Cập nhật' : 'Đăng'}
           </button>
         </div>
       </form>
