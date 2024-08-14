@@ -1,7 +1,13 @@
-import "./App.css";
+import CreatePost from "./pages/blog/components/CreatePost";
+import PostList from "./pages/blog/components/PostList";
 
 function App() {
-  return <div className="App">Hello World</div>;
+  return (
+    <div>
+      <CreatePost />
+      <PostList />
+    </div>
+  );
 }
 
 export default App;
